@@ -4,10 +4,19 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-namespace Example
+
+namespace Server
 {
-    class Server
+    public class Core
     {
+        public Core(int port)
+        {
+            RunServer(port).Wait();
+
+            Console.WriteLine("Press Any key...");
+            Console.ReadLine();
+        }
+
         static async Task RunServer(int port)
         {
             var ipep = new IPEndPoint(IPAddress.Any, port);
@@ -93,14 +102,6 @@ namespace Example
                 task.Start();
                 await task;
             }
-        }
-
-        static void Main(string[] args)
-        {
-            RunServer(7777).Wait();
-
-            Console.WriteLine("Press Any key...");
-            Console.ReadLine();
         }
     }
 }
