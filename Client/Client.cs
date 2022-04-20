@@ -3,6 +3,8 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+
 namespace Example
 {
     class Client
@@ -40,7 +42,15 @@ namespace Example
                 while (true)
                 {
                     var msg = Console.ReadLine();
+                    if("1".Equals(msg, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Packet.C_Packet packet = new Packet.C_Packet { Id = 1, Name = "Youngmin"};
+                        msg = JsonConvert.SerializeObject(packet);
+
+                    }
+
                     client.Send(Encoding.ASCII.GetBytes(msg + "\r\n"));
+
                     if ("EXIT".Equals(msg, StringComparison.OrdinalIgnoreCase))
                     {
                         break;

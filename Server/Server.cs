@@ -3,6 +3,7 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 namespace Example
 {
     class Server
@@ -15,6 +16,7 @@ namespace Example
                 server.Bind(ipep);
                 server.Listen(20);
                 Console.WriteLine($"Server Start... Listen port {ipep.Port}...");
+
                 var task = new Task(() =>
                 {
                     while (true)
@@ -23,7 +25,7 @@ namespace Example
                         new Task(() =>
                         {
                             var ip = client.RemoteEndPoint as IPEndPoint;
-                            Console.WriteLine($"Client : (From: {ip.Address.ToString()}:{ip.Port}, Connection time: {DateTime.Now})");
+                            Console.WriteLine($"Client : (From: {ip?.Address.ToString()}:{ip.Port}, Connection time: {DateTime.Now})");
                             client.Send(Encoding.ASCII.GetBytes("Welcome YoungMin's Server!\r\n>"));
 
                             var sb = new StringBuilder();
@@ -57,7 +59,7 @@ namespace Example
                                                 Console.WriteLine("[Just Word] " + sb);
                                             }
                                         }
-                                        else if (sb.Length > 2) //&& sb[sb.Length - 2] == '\r' && sb[sb.Length - 1] == '\n')
+                                        else if (sb.Length > 2)
                                         {
                                             data = sb.ToString().Replace("\n", "").Replace("\r", "");
                                             if (String.IsNullOrWhiteSpace(data))
@@ -68,7 +70,10 @@ namespace Example
                                             {
                                                 break;
                                             }
-                                            Console.WriteLine("[PPRK version] " + data);
+                                            string str = sb.ToString();
+                                            Packet.C_Packet? packet;
+                                            packet = JsonConvert.DeserializeObject<Packet.C_Packet>(str);
+                                            Console.WriteLine("[PPRK version] " + packet?.Name);
                                         }
 
                                         sb.Length = 0;
@@ -78,9 +83,9 @@ namespace Example
                                 }
                                  catch (SocketException)
                                 {
-                                    // 접속 끝김이 발생하면 Exception이 발생
+                                    Console.WriteLine($"{ip.Address.ToString()}'s Process Crush");
                                 }
-                            Console.WriteLine($"Disconnected : (From: {ip.Address.ToString()}:{ip.Port}, Connection time: {DateTime.Now})");
+                                Console.WriteLine($"Disconnected : (From: {ip.Address.ToString()}:{ip.Port}, Connection time: {DateTime.Now})");
                             }
                         }).Start();
                     }
