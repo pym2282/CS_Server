@@ -6,6 +6,13 @@ using System.Threading.Tasks;
 
 namespace Packet
 {
+    public struct Vector3D
+    {
+        public float X;
+        public float Y;
+        public float Z;
+    }
+
     public class R_Signin
     {
         public int Id;
@@ -29,5 +36,11 @@ namespace Packet
         public string packetname;
         public int type;
         public int value;
+    }
+    public class T_Vector_Packet
+    {
+        public string packetname;
+        public int type;
+        public Vector3D value;
     }
 }

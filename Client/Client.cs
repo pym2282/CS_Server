@@ -41,7 +41,20 @@ namespace Example
                 {
                     var msg = Console.ReadLine();
                     Byte[] json = new Byte[4];
-                    if ("1".Equals(msg, StringComparison.OrdinalIgnoreCase))
+                    if ("0".Equals(msg, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Packet.T_Int_Packet packet = new Packet.T_Int_Packet { packetname = "testint", type = 0, value = 5 };
+                        msg = JsonConvert.SerializeObject(packet);
+
+                        int size = msg.Length + 4;
+                        int id = 0;
+                        json[0] = (Byte)size;
+                        json[1] |= (Byte)(size << 8);
+                        json[2] = (Byte)id;
+                        json[3] |= (Byte)(id << 8);
+                        json = json.Concat<Byte>(Encoding.ASCII.GetBytes(msg)).ToArray();
+                    }
+                   else if ("1".Equals(msg, StringComparison.OrdinalIgnoreCase))
                     {
                         Packet.R_Signin packet = new Packet.R_Signin { Id = 1 };
                         msg = JsonConvert.SerializeObject(packet);
@@ -79,6 +92,10 @@ namespace Example
                         json[2] = (Byte)id;
                         json[3] |= (Byte)(id << 8);
                         json = json.Concat<Byte>(Encoding.ASCII.GetBytes(msg)).ToArray();
+                    }
+                    else
+                    {
+                        client.Send(Encoding.ASCII.GetBytes(msg.ToString()));
                     }
 
                     client.Send(json);

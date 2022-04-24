@@ -87,8 +87,22 @@ namespace Server
                          }
                          else
                          {
-                             recv.packets[id](sb.Remove(0, 4).ToString());
-                         }
+                            // recv.packets[id](sb.Remove(0, 4).ToString());
+
+                            Packet.T_Int_Packet intpacket = JsonConvert.DeserializeObject<Packet.T_Int_Packet>(sb.Remove(0, 4).ToString());
+                            if(intpacket.type == 0)
+                            {
+                                string msg = JsonConvert.SerializeObject(intpacket);
+
+                                recv.TestAllSend(msg);
+                            }
+                            else if (intpacket.type == 1)
+                            {
+                                string msg = JsonConvert.SerializeObject(intpacket);
+
+                                // recv.TestTargetSend(packet.id , msg);
+                            }
+                        }
                 
                          str = "[Prefect] " + sb + "\n";
                      }

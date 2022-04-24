@@ -9,7 +9,7 @@ namespace Server
 {
     public class Data : Server
     {
-        Dictionary<int, Player> players = new Dictionary<int, Player>();
+        public Dictionary<int, Player> players = new Dictionary<int, Player>();
 
         public Player GetPlayer(int id) { return players[id]; }
 

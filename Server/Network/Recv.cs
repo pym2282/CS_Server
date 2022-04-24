@@ -45,6 +45,27 @@ namespace Server
             if (packet.targetId == 0) return;
             data.GetPlayer(packet.targetId).SendMessage(packet.message);
        }
+       public void TestAllSend(string json)
+       {
+            Packet.T_Int_Packet packet = JsonConvert.DeserializeObject<Packet.T_Int_Packet>(json);
 
+            //  msg = JsonConvert.SerializeObject(packet);
+
+            //int size = msg.Length + 4;
+            //int id = 2;
+            //json[0] = (Byte)size;
+            //json[1] |= (Byte)(size << 8);
+            //json[2] = (Byte)id;
+            //json[3] |= (Byte)(id << 8);
+            //json = json.Concat<Byte>(Encoding.ASCII.GetBytes(msg)).ToArray();
+            //if (packet.targetId == 0) return;
+
+            foreach (KeyValuePair<int, Player> info in data.players)
+            {
+                data.GetPlayer(info.Key).SendMessage(json);
+            }
+
+            //data.GetPlayer(packet.targetId).SendMessage(packet.message);
+       }
     }
 }
