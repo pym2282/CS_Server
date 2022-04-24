@@ -43,7 +43,14 @@ namespace Server
 
         public void SendMessage(string msg)
         {
-            connect.Send(Encoding.ASCII.GetBytes(msg));
+            try
+            {
+                connect.Send(Encoding.ASCII.GetBytes(msg));
+            }
+            catch (ObjectDisposedException)
+            {
+                Console.WriteLine($"User Already Disconnect.");
+            }
         }
 
         Socket connect;

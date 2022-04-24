@@ -1,9 +1,7 @@
-﻿using System;
-using System.Text;
+﻿using Newtonsoft.Json;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+using System.Text;
 
 namespace Example
 {
@@ -45,7 +43,7 @@ namespace Example
                     Byte[] json = new Byte[4];
                     if ("1".Equals(msg, StringComparison.OrdinalIgnoreCase))
                     {
-                        Packet.R_Signin packet = new Packet.R_Signin { Id = 1};
+                        Packet.R_Signin packet = new Packet.R_Signin { Id = 1 };
                         msg = JsonConvert.SerializeObject(packet);
 
                         int size = msg.Length + 4;

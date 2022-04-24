@@ -24,4 +24,10 @@ namespace Packet
         public int targetId;
         public string message;
     }
+    public class T_Int_Packet
+    {
+        public string packetname;
+        public int type;
+        public int value;
+    }
 }

@@ -7,9 +7,9 @@ using Newtonsoft.Json;
 
 namespace Server
 {
-    public class Core : Server
+    public class TestCore : Server
     {
-        public Core(int port, Server root) : base(root)
+        public TestCore(int port, Server root) : base(root)
         {
             RunServer(port).Wait();
 
@@ -87,7 +87,7 @@ namespace Server
                          }
                          else
                          {
-                            recv.packets[id](sb.Remove(0, 4).ToString());
+                             recv.packets[id](sb.Remove(0, 4).ToString());
                          }
                 
                          str = "[Prefect] " + sb + "\n";
@@ -108,7 +108,7 @@ namespace Server
                      {
                          break;
                      }
-                     str = "[PPRK version] " + sb + "\n";
+                     str = "[PPRK version] " + "\n";
                  }
                 
                  sb.Length = 0;
@@ -118,42 +118,5 @@ namespace Server
                 
             }
         }
-    }
-
-    public class Server
-    {
-        protected Start start {
-            get
-            {
-                return (Start)_root;
-            }
-        }
-        protected Network net
-        {
-            get
-            {
-                return start.netInstance;
-            }
-        }
-        protected Data data
-        {
-            get
-            {
-                return start.dataInstance;
-            }
-        }
-        protected Recv recv
-        {
-            get
-            {
-                return start.recvInstance;
-            }
-        }
-        public Server(Server root)
-        {
-            _root = root;
-        }
-
-        public Server _root;
     }
 }
