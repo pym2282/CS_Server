@@ -42,14 +42,48 @@ namespace Example
                 while (true)
                 {
                     var msg = Console.ReadLine();
-                    if("1".Equals(msg, StringComparison.OrdinalIgnoreCase))
+                    Byte[] json = new Byte[4];
+                    if ("1".Equals(msg, StringComparison.OrdinalIgnoreCase))
                     {
-                        Packet.C_Packet packet = new Packet.C_Packet { Id = 1, Name = "Youngmin"};
+                        Packet.R_Signin packet = new Packet.R_Signin { Id = 1};
                         msg = JsonConvert.SerializeObject(packet);
 
+                        int size = msg.Length + 4;
+                        int id = 1;
+                        json[0] = (Byte)size;
+                        json[1] |= (Byte)(size << 8);
+                        json[2] = (Byte)id;
+                        json[3] |= (Byte)(id << 8);
+                        json = json.Concat<Byte>(Encoding.ASCII.GetBytes(msg)).ToArray();
+                    }
+                    else if ("2".Equals(msg, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Packet.R_Signin packet = new Packet.R_Signin { Id = 2 };
+                        msg = JsonConvert.SerializeObject(packet);
+
+                        int size = msg.Length + 4;
+                        int id = 1;
+                        json[0] = (Byte)size;
+                        json[1] |= (Byte)(size << 8);
+                        json[2] = (Byte)id;
+                        json[3] |= (Byte)(id << 8);
+                        json = json.Concat<Byte>(Encoding.ASCII.GetBytes(msg)).ToArray();
+                    }
+                    else if ("3".Equals(msg, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Packet.S_SendMessage packet = new Packet.S_SendMessage { Id = 1, targetId = 2, message = "Hello" };
+                        msg = JsonConvert.SerializeObject(packet);
+
+                        int size = msg.Length + 4;
+                        int id = 2;
+                        json[0] = (Byte)size;
+                        json[1] |= (Byte)(size << 8);
+                        json[2] = (Byte)id;
+                        json[3] |= (Byte)(id << 8);
+                        json = json.Concat<Byte>(Encoding.ASCII.GetBytes(msg)).ToArray();
                     }
 
-                    client.Send(Encoding.ASCII.GetBytes(msg + "\r\n"));
+                    client.Send(json);
 
                     if ("EXIT".Equals(msg, StringComparison.OrdinalIgnoreCase))
                     {

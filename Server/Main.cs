@@ -7,12 +7,27 @@ using System.Threading.Tasks;
 
 namespace Server
 {
-    class Start
+    public class Start : Server
     {
+        public Data dataInstance;
+        public Network netInstance;
+        public Recv recvInstance;
+        void Init()
+        {
+            dataInstance = new Data(this);
+            recvInstance = new Recv(this);
+
+
+            netInstance = new Network(this);
+        }
+        Start() : base(null)
+        {
+            Init();
+        }
+
         static void Main(string[] args)
         {
-            Core core = new Core(7777);
-
+            Start main = new Start();
         }
     }
 }

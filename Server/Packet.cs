@@ -6,9 +6,22 @@ using System.Threading.Tasks;
 
 namespace Packet
 {
-    public class C_Packet
+    public class R_Signin
     {
         public int Id;
-        public string Name;
+    }
+
+    public class R_SendMessage
+    {
+        public int Id;
+        public int targetId;
+        public string message;
+    }
+
+    public class S_SendMessage
+    {
+        public int Id;
+        public int targetId;
+        public string message;
     }
 }
