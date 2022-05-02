@@ -87,10 +87,12 @@ namespace Server
                          }
                          else
                          {
-                            recv.packets[id](sb.Remove(0, 4).ToString());
+                            recv.TestAllSend(sb.ToString());
+                           // recv.packets[id](sb.Remove(0, 4).ToString());
                          }
-                
-                         str = "[Prefect] " + sb + "\n";
+
+                        Console.WriteLine($"{sb} + \n");
+                       // str = "[Prefect] " + sb + "\n";
                      }
                      else
                      {
@@ -113,8 +115,8 @@ namespace Server
                 
                  sb.Length = 0;
                  var sendMsg = Encoding.ASCII.GetBytes(str);
-                Console.WriteLine($"{str}");
-                client.Send(sendMsg);
+               // Console.WriteLine($"{str}");
+                //client.Send(sendMsg);
                 
             }
         }

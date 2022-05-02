@@ -24,27 +24,34 @@ namespace Server
 
        public void R_Signin(string json, Socket client)
        {
-           Packet.R_Signin packet = JsonConvert.DeserializeObject<Packet.R_Signin>(json);
+           Packet.T_Packet packet = JsonConvert.DeserializeObject<Packet.T_Packet>(json);
 
-           data.ConnectPlayer(packet.Id, client);
-           data.GetPlayer(packet.Id).SendMessage("Hello " + packet.Id + " User\n");
+           data.ConnectPlayer(packet.value["iplayerid"], client);
+
+           TestAllSend(json);
        }
        public void R_SendMessage(string json)
        {
            Packet.S_SendMessage packet = JsonConvert.DeserializeObject<Packet.S_SendMessage>(json);
-
-            //  msg = JsonConvert.SerializeObject(packet);
-
-            //int size = msg.Length + 4;
-            //int id = 2;
-            //json[0] = (Byte)size;
-            //json[1] |= (Byte)(size << 8);
-            //json[2] = (Byte)id;
-            //json[3] |= (Byte)(id << 8);
-            //json = json.Concat<Byte>(Encoding.ASCII.GetBytes(msg)).ToArray();
-            if (packet.targetId == 0) return;
-            data.GetPlayer(packet.targetId).SendMessage(packet.message);
        }
+       public void TestAllSend(string json)
+       {
+            Packet.T_Packet packet = JsonConvert.DeserializeObject<Packet.T_Packet>(json);
 
+            Byte[] bytes = new Byte[4];
+
+            int size = json.Length + 4;
+            int id = 0;
+            bytes[0] = (Byte)size;
+            bytes[1] |= (Byte)(size << 8);
+            bytes[2] = (Byte)id;
+            bytes[3] |= (Byte)(id << 8);
+            bytes = bytes.Concat<Byte>(Encoding.ASCII.GetBytes(json)).ToArray();
+
+            foreach (KeyValuePair<string, Player> info in data.players)
+            {
+                data.GetPlayer(info.Key).SendBytes(bytes);
+            }
+       }
     }
 }

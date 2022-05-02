@@ -30,4 +30,16 @@ namespace Packet
         public int type;
         public int value;
     }
+    public class T_Vector_Packet
+    {
+        public string packetname;
+        public int type;
+        public Vector3D value;
+    }
+    public class T_Packet
+    {
+        public string packetname;
+        public int type;
+        public Dictionary<string, string> value;
+    }
 }
