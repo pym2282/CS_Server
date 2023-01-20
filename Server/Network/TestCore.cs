@@ -75,19 +75,21 @@ namespace Server
                  {
                      int size = sb[0];
                      size |= sb[1];
+                     size |= sb[2];
+                     size |= sb[3];
                 
                      if (sb.Length == size)
                      {
-                         int id = sb[2];
-                         id |= sb[3];
+                         int id = sb[4];
+                         id |= sb[5];
                 
-                         if (id == 1)
+                        //if (id == 1)
+                        //{
+                        //    recv.R_Signin(sb.Remove(0, 4).ToString(), client);
+                        //}
+                        //else
                          {
-                             recv.R_Signin(sb.Remove(0, 4).ToString(), client);
-                         }
-                         else
-                         {
-                             recv.packets[id](sb.Remove(0, 4).ToString());
+                        //     recv.packets[id](sb.Remove(0, 4).ToString(), client);
                          }
                 
                          str = "[Prefect] " + sb + "\n";
@@ -104,14 +106,13 @@ namespace Server
                             {
                                 string msg = JsonConvert.SerializeObject(intpacket);
 
-                                // recv.TestTargetSend(packet.id , msg);
-                            }
+                            // recv.TestTargetSend(packet.id , msg);
                         }
 
-                        // str = "[Prefect] " + sb + "\n";
-                        recv.TestAllSend(sb.ToString());
-                     }
-                     else
+                    // str = "[Prefect] " + sb + "\n";
+                    //recv.TestAllSend(sb.ToString());
+                }
+                else
                      {
                          str = "[Just Word] " + sb + "\n";
                      }

@@ -4,6 +4,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Packet;
+using System.Numerics;
+using static Server.Recv;
 
 namespace Server
 {
@@ -33,91 +36,86 @@ namespace Server
                         var client = server.Accept();
                         new Task(() =>
                         {
-                            int playerid = 0;
+                            string playerid = "";
                             var ip = client.RemoteEndPoint as IPEndPoint;
-                            Console.WriteLine($"Client : (From: {ip?.Address.ToString()}:{ip.Port}, Connection time: {DateTime.Now})");
-                            client.Send(Encoding.ASCII.GetBytes("Welcome YoungMin's Server!\r\n>"));
+                            Console.WriteLine($"Client : (From: {ip?.Address.ToString()}:{ip?.Port}, Connection time: {DateTime.Now})");
 
                             using (client)
                             {
                                 try
                                 {
-                                    RecvPacket(client);
+                                    //** Recv Packet */
+                                    var sb = new StringBuilder();
+                                    Queue<string> buffer = new Queue<string>();
+                                    while (true)
+                                    {
+                                        var binary = new Byte[1024];
+                                        int result = client.Receive(binary);
+                                        var packet = Encoding.ASCII.GetString(binary);
+                                        var recvData = packet.Trim('\0');
+
+                                        if (result == 0) break;
+
+                                        int size = BitConverter.ToInt32(binary, 0) - 6;
+                                        int type = BitConverter.ToInt16(binary, 4);
+                                        var json = recvData.Substring(6, size);
+                                        recvData = recvData.Remove(0, size + 6);
+
+                                        buffer.Enqueue(json);
+
+                                        while (buffer.Count > 0)
+                                        {
+                                            if(type == 0)
+                                            {
+                                                BasePacket jsonObject = JsonConvert.DeserializeObject<BasePacket>(json);
+                                                string fieldValue = jsonObject.packetid;
+
+                                                if (fieldValue == "PlayerID")
+                                                {
+                                                    R_Signin? _packet = JsonConvert.DeserializeObject<R_Signin>(json);
+                                                    playerid = _packet?.playerid ?? "";
+                                                }
+                                                json = buffer.Dequeue();
+                                                recv.packets[fieldValue](json, client);
+
+                                                Console.WriteLine($"{json}");
+                                            }
+                                            else if(type == 1)
+                                            {
+                                                json = buffer.Dequeue();
+                                                recv.SendBroadcast(json);
+                                                Console.WriteLine($"BroadCast Packet : {json}");
+                                            }
+                                            else if(type == 2)
+                                            {
+                                                json = buffer.Dequeue();
+                                                recv.SendOthercast(playerid, json);
+                                                Console.WriteLine($"OtherCast Packet : {json}");
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine($"ErrorPacket");
+                                            }
+                                        }
+                                    }
                                 }
-                                 catch (SocketException)
+                                catch (SocketException)
                                 {
-                                    Console.WriteLine($"{ip.Address.ToString()}'s Process Crush");
+                                    Console.WriteLine($"{ip?.Address.ToString()}'s Process Crush");
                                 }
-                                Console.WriteLine($"Disconnected : (From: {ip.Address.ToString()}:{ip.Port}, Connection time: {DateTime.Now})");
+
+                                //** Disconnect Client */
+                                //Console.WriteLine($"Disconnected : (From: {ip.Address.ToString()}:{ip.Port}, Connection time: {DateTime.Now})");
                             }
+
+                            //** Disconnect Client */
+                            Console.WriteLine($"Disconnected And Remove Player id : {playerid}");
+                            data.Disconnect(playerid);
                         }).Start();
                     }
                 });
                 task.Start();
                 await task;
-            }
-        }
-
-        void RecvPacket(Socket client)
-        {
-            var sb = new StringBuilder();
-            while (true)
-            {
-                 string str = null;
-                 var binary = new Byte[1024];
-                 client.Receive(binary);
-                 var packet = Encoding.ASCII.GetString(binary);
-                 sb.Append(packet.Trim('\0'));
-                 if (sb.Length <= 2)
-                     continue;
-                
-                 if (sb[0] != '{')
-                 {
-                     int size = sb[0];
-                     size |= sb[1];
-                
-                     if (sb.Length == size)
-                     {
-                         int id = sb[2];
-                         id |= sb[3];
-                
-                         if (id == 1)
-                         {
-                             recv.R_Signin(sb.Remove(0, 4).ToString(), client);
-                         }
-                         else
-                         {
-                            recv.TestAllSend(sb.ToString());
-                           // recv.packets[id](sb.Remove(0, 4).ToString());
-                         }
-
-                        Console.WriteLine($"{sb} + \n");
-                       // str = "[Prefect] " + sb + "\n";
-                     }
-                     else
-                     {
-                         str = "[Just Word] " + sb + "\n";
-                     }
-                 }
-                 else if (sb.Length > 2)
-                 {
-                     packet = sb.ToString().Replace("\n", "").Replace("\r", "");
-                     if (String.IsNullOrWhiteSpace(packet))
-                     {
-                         continue;
-                     }
-                     if ("EXIT".Equals(packet, StringComparison.OrdinalIgnoreCase))
-                     {
-                         break;
-                     }
-                     str = "[PPRK version] " + sb + "\n";
-                 }
-                
-                 sb.Length = 0;
-                 var sendMsg = Encoding.ASCII.GetBytes(str);
-               // Console.WriteLine($"{str}");
-                //client.Send(sendMsg);
-                
             }
         }
     }

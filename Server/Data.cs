@@ -4,15 +4,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
+using System.Numerics;
+using System.Drawing;
+using System.Collections.Concurrent;
 
 namespace Server
 {
     public class Data : Server
     {
-        Dictionary<int, Player> players = new Dictionary<int, Player>();
-        public Dictionary<string, Player> players = new Dictionary<string, Player>();
+        //Dictionary<int, Player> players = new Dictionary<int, Player>();
+        public ConcurrentDictionary<string, Player> players = new ConcurrentDictionary<string, Player>();
 
-        public Player GetPlayer(string id) { return players[id]; }
+        public Player GetPlayer(string id)
+        {
+            if (players.ContainsKey(id))
+            {
+                return players[id];
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         public Data(Server root) : base(root)
         {
@@ -23,12 +36,21 @@ namespace Server
         {
             Player player = new Player(socket);
             if(players.ContainsKey(playerid) == false)
-             players.Add(playerid, player);
+             players.TryAdd(playerid, player);
+        }
+        public void ConnectPlayer(Socket socket)
+        {
+            Random  rand = new Random();
+            string playerid = rand.Next().ToString();
+            Player player = new Player(socket);
+            if (players.ContainsKey(playerid) == false)
+                players.TryAdd(playerid, player);
         }
 
         public void Disconnect(string playerid)
         {
-            players.Remove(playerid);
+            Player player = new Player();
+            players.TryRemove(playerid, out player);
         }
 
 
@@ -37,6 +59,10 @@ namespace Server
 
     public class Player
     {
+        public Player()
+        {
+        }
+
         public Player(Socket socket)
         {
             connect = socket;
@@ -67,6 +93,11 @@ namespace Server
 
 
         Socket connect;
+
+        public string id;
+
+        public Vector3 position;
+        public Vector3 rotation;
     }
 };
 

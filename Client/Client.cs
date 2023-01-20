@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using Packet;
+using Server;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -43,7 +45,7 @@ namespace Example
                     Byte[] json = new Byte[4];
                     if ("1".Equals(msg, StringComparison.OrdinalIgnoreCase))
                     {
-                        Packet.R_Signin packet = new Packet.R_Signin { Id = 1 };
+                        Packet.R_Signin packet = new Packet.R_Signin { playerid = "" };
                         msg = JsonConvert.SerializeObject(packet);
 
                         int size = msg.Length + 4;
@@ -56,7 +58,7 @@ namespace Example
                     }
                     else if ("2".Equals(msg, StringComparison.OrdinalIgnoreCase))
                     {
-                        Packet.R_Signin packet = new Packet.R_Signin { Id = 2 };
+                        Packet.R_Signin packet = new Packet.R_Signin { playerid = "" };
                         msg = JsonConvert.SerializeObject(packet);
 
                         int size = msg.Length + 4;
