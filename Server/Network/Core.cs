@@ -49,54 +49,8 @@ namespace Server
                                     Queue<string> buffer = new Queue<string>();
                                     while (true)
                                     {
-                                        var binary = new Byte[1024];
-                                        int result = client.Receive(binary);
-                                        var packet = Encoding.ASCII.GetString(binary);
-                                        var recvData = packet.Trim('\0');
-
-                                        if (result == 0) break;
-
-                                        int size = BitConverter.ToInt32(binary, 0) - 6;
-                                        int type = BitConverter.ToInt16(binary, 4);
-                                        var json = recvData.Substring(6, size);
-                                        recvData = recvData.Remove(0, size + 6);
-
-                                        buffer.Enqueue(json);
-
-                                        while (buffer.Count > 0)
-                                        {
-                                            if(type == 0)
-                                            {
-                                                BasePacket jsonObject = JsonConvert.DeserializeObject<BasePacket>(json);
-                                                string fieldValue = jsonObject.packetid;
-
-                                                if (fieldValue == "PlayerID")
-                                                {
-                                                    R_Signin? _packet = JsonConvert.DeserializeObject<R_Signin>(json);
-                                                    playerid = _packet?.playerid ?? "";
-                                                }
-                                                json = buffer.Dequeue();
-                                                recv.packets[fieldValue](json, client);
-
-                                                Console.WriteLine($"{json}");
-                                            }
-                                            else if(type == 1)
-                                            {
-                                                json = buffer.Dequeue();
-                                                recv.SendBroadcast(json);
-                                                Console.WriteLine($"BroadCast Packet : {json}");
-                                            }
-                                            else if(type == 2)
-                                            {
-                                                json = buffer.Dequeue();
-                                                recv.SendOthercast(playerid, json);
-                                                Console.WriteLine($"OtherCast Packet : {json}");
-                                            }
-                                            else
-                                            {
-                                                Console.WriteLine($"ErrorPacket");
-                                            }
-                                        }
+                                        ConnectEchoPlayer(client, buffer);
+                                        //ConnectPlayer(client, buffer, playerid);
                                     }
                                 }
                                 catch (SocketException)
@@ -116,6 +70,77 @@ namespace Server
                 });
                 task.Start();
                 await task;
+            }
+        }
+
+        void ConnectEchoPlayer(Socket client, Queue<string> buffer)
+        {
+            var binary = new Byte[1024];
+            int result = client.Receive(binary);
+            var packet = Encoding.ASCII.GetString(binary);
+            var recvData = packet.Trim('\0');
+
+            if (result == 0) return;
+
+            buffer.Enqueue(recvData);
+
+            while (buffer.Count > 0)
+            {
+                recvData = buffer.Dequeue();
+                recv.SendBroadcast(recvData);
+                Console.WriteLine($"OtherCast Packet : {recvData}");
+            }
+        }
+
+        void ConnectPlayer(Socket client, Queue<string> buffer, string playerid)
+        {
+            var binary = new Byte[1024];
+            int result = client.Receive(binary);
+            var packet = Encoding.ASCII.GetString(binary);
+            var recvData = packet.Trim('\0');
+
+            if (result == 0) return;
+
+            int size = BitConverter.ToInt32(binary, 0) - 6;
+            int type = BitConverter.ToInt16(binary, 4);
+            var json = recvData.Substring(6, size);
+            recvData = recvData.Remove(0, size + 6);
+
+            buffer.Enqueue(json);
+
+            while (buffer.Count > 0)
+            {
+                if (type == 0)
+                {
+                    BasePacket jsonObject = JsonConvert.DeserializeObject<BasePacket>(json);
+                    string fieldValue = jsonObject.packetid;
+
+                    if (fieldValue == "PlayerID")
+                    {
+                        R_Signin? _packet = JsonConvert.DeserializeObject<R_Signin>(json);
+                        playerid = _packet?.playerid ?? "";
+                    }
+                    json = buffer.Dequeue();
+                    recv.packets[fieldValue](json, client);
+
+                    Console.WriteLine($"{json}");
+                }
+                else if (type == 1)
+                {
+                    json = buffer.Dequeue();
+                    recv.SendBroadcast(json);
+                    Console.WriteLine($"BroadCast Packet : {json}");
+                }
+                else if (type == 2)
+                {
+                    json = buffer.Dequeue();
+                    recv.SendOthercast(playerid, json);
+                    Console.WriteLine($"OtherCast Packet : {json}");
+                }
+                else
+                {
+                    Console.WriteLine($"ErrorPacket");
+                }
             }
         }
     }
