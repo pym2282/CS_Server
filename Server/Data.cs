@@ -76,7 +76,7 @@ namespace Server
             }
             catch (ObjectDisposedException)
             {
-                Console.WriteLine($"User Already Disconnect.");
+                Console.WriteLine($"User Already Disconnect. \n");
             }
         }
         public void SendBytes(Byte[] msg)
@@ -87,7 +87,7 @@ namespace Server
             }
             catch (ObjectDisposedException)
             {
-                Console.WriteLine($"User Already Disconnect.");
+                Console.WriteLine($"User Already Disconnect. \n");
             }
         }
 

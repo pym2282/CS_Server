@@ -47,10 +47,28 @@ namespace Server
                                     //** Recv Packet */
                                     var sb = new StringBuilder();
                                     Queue<string> buffer = new Queue<string>();
+
+                                    //playerid = "1234";
+                                    //Player player = new Player(client);
+                                    //player.id = playerid;
+                                    //player.position = Vector3.Zero;
+                                    //player.rotation = Vector3.Zero;
+                                    //data.players.TryAdd(playerid, player);
+                                    //recv.TestAllEchoSend("Hello User 123\n");
+
+                                    //S_Signin packet = new S_Signin();
+                                    //packet.playerid = "1234";
+                                    //string datda = JsonConvert.SerializeObject(packet);
+
                                     while (true)
                                     {
-                                        ConnectEchoPlayer(client, buffer);
-                                        //ConnectPlayer(client, buffer, playerid);
+                                        //ConnectEchoPlayer(client, buffer);
+                                        string outId;
+                                        ConnectPlayer(client, buffer, playerid, out outId);
+                                        if(outId != "")
+                                        {
+                                            playerid = outId;
+                                        }
                                     }
                                 }
                                 catch (SocketException)
@@ -92,14 +110,18 @@ namespace Server
             }
         }
 
-        void ConnectPlayer(Socket client, Queue<string> buffer, string playerid)
+        void ConnectPlayer(Socket client, Queue<string> buffer, string playerid, out string outId)
         {
             var binary = new Byte[1024];
             int result = client.Receive(binary);
             var packet = Encoding.ASCII.GetString(binary);
             var recvData = packet.Trim('\0');
 
-            if (result == 0) return;
+            if (result == 0)
+            {
+                outId = "";
+                return;
+            }
 
             int size = BitConverter.ToInt32(binary, 0) - 6;
             int type = BitConverter.ToInt16(binary, 4);
@@ -115,11 +137,12 @@ namespace Server
                     BasePacket jsonObject = JsonConvert.DeserializeObject<BasePacket>(json);
                     string fieldValue = jsonObject.packetid;
 
-                    if (fieldValue == "PlayerID")
-                    {
-                        R_Signin? _packet = JsonConvert.DeserializeObject<R_Signin>(json);
-                        playerid = _packet?.playerid ?? "";
-                    }
+                    //if (fieldValue == "Signin")
+                    //{
+                    //    R_Signin? _packet = JsonConvert.DeserializeObject<R_Signin>(json);
+                    //    playerid = _packet?.playerid ?? "";
+                    //}
+
                     json = buffer.Dequeue();
                     recv.packets[fieldValue](json, client);
 
@@ -129,19 +152,20 @@ namespace Server
                 {
                     json = buffer.Dequeue();
                     recv.SendBroadcast(json);
-                    Console.WriteLine($"BroadCast Packet : {json}");
+                    //Console.WriteLine($"BroadCast Packet : {json}");
                 }
                 else if (type == 2)
                 {
                     json = buffer.Dequeue();
                     recv.SendOthercast(playerid, json);
-                    Console.WriteLine($"OtherCast Packet : {json}");
+                    //Console.WriteLine($"OtherCast Packet : {json}");
                 }
                 else
                 {
                     Console.WriteLine($"ErrorPacket");
                 }
             }
+            outId = playerid;
         }
     }
 

@@ -19,7 +19,7 @@ namespace Server
 
         public Recv(Server root) : base(root)
         {
-            packets["PlayerID"]             = Signin;
+            packets["Signin"]               = Signin;
             packets["SendMessage"]          = SendMessage;
             packets["PlayerMove"]           = PlayerMove;
             packets["PlayerActionEvent"]    = PlayerActionEvent;
@@ -45,7 +45,13 @@ namespace Server
                 foreach (KeyValuePair<string, Player> info in data.players)
                 {
                     if (info.Key != _packet.playerid)
-                        SendPacketToPlayer(info.Key, _packet);
+                    {
+                        Packet.S_Signin s_packet = new S_Signin();
+                        s_packet.playerid = info.Key;
+                        s_packet.Position = data.GetPlayer(info.Key).position;
+                        s_packet.Rotation = data.GetPlayer(info.Key).rotation;
+                        SendPacketToPlayer(info.Key, s_packet);
+                    }
                 }
             }
         }
@@ -67,7 +73,6 @@ namespace Server
                     s_packet.PlayerId = info.Key;
                     s_packet.Position = Vector3.Zero;
                     s_packet.Rotation = Vector3.Zero;
-                    //string jsondata = JsonConvert.SerializeObject(s_packet);
                     SendPacketToPlayer(info.Key, packet);
                 }
             }
@@ -162,6 +167,7 @@ namespace Server
 
         public void SendBroadcast(string json)
         {
+            Console.WriteLine($"BroadCast Packet : {json}");
             foreach (KeyValuePair<string, Player> info in data.players)
             {
                 SendJsonToPlayer(info.Key, json);
@@ -173,6 +179,7 @@ namespace Server
         {
             if (playerid == "") return;
 
+            Console.WriteLine($"OtherCast Packet : {json}");
             foreach (KeyValuePair<string, Player> info in data.players)
             {
                 if(playerid != info.Key)
@@ -185,6 +192,7 @@ namespace Server
 
         public void TestAllEchoSend(string json)
         {
+            Console.WriteLine($"Test Echo Packet : {json}");
             foreach (KeyValuePair<string, Player> info in data.players)
             {
                 data.GetPlayer(info.Key).SendMessage(json);
@@ -195,7 +203,7 @@ namespace Server
         {
             string  json    = JsonConvert.SerializeObject(packet);
             int     size    = json.Length + 6;
-            Int16     type    = 0;
+            Int16   type    = 0;
             
             byte[] sizeBytes = BitConverter.GetBytes(size);
             byte[] typeBytes = BitConverter.GetBytes(type);
