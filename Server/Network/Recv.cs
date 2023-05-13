@@ -210,7 +210,7 @@ namespace Server
             byte[] jsonBytes = Encoding.ASCII.GetBytes(json);
             byte[] bytes = sizeBytes.Concat(typeBytes).Concat(jsonBytes).ToArray(); 
        
-            data.GetPlayer(playerid).SendBytes(bytes);
+            data.GetPlayer(playerid)?.SendBytes(bytes);
         }
         public void SendJsonToPlayer(string playerid, string json)
         {
@@ -222,7 +222,7 @@ namespace Server
             byte[] jsonBytes = Encoding.ASCII.GetBytes(json);
             byte[] bytes = sizeBytes.Concat(typeBytes).Concat(jsonBytes).ToArray();
 
-            data.GetPlayer(playerid).SendBytes(bytes);
+            data.GetPlayer(playerid)?.SendBytes(bytes);
         }
     }
 }

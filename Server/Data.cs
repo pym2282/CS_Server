@@ -19,6 +19,11 @@ namespace Server
         {
             if (players.ContainsKey(id))
             {
+                if(players[id] == null)
+                {
+                    return null;
+                }
+
                 return players[id];
             }
             else

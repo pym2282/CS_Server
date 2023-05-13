@@ -137,23 +137,27 @@ namespace Server
                     BasePacket jsonObject = JsonConvert.DeserializeObject<BasePacket>(json);
                     string fieldValue = jsonObject.packetid;
 
-                    //if (fieldValue == "Signin")
-                    //{
-                    //    R_Signin? _packet = JsonConvert.DeserializeObject<R_Signin>(json);
-                    //    playerid = _packet?.playerid ?? "";
-                    //}
+                    if (fieldValue == "Signin")
+                    {
+                        R_Signin? _packet = JsonConvert.DeserializeObject<R_Signin>(json);
+                        playerid = _packet?.playerid ?? "";
+                    }
 
                     json = buffer.Dequeue();
                     recv.packets[fieldValue](json, client);
 
                     Console.WriteLine($"{json}");
                 }
+
+                // ALL BroadCast
                 else if (type == 1)
                 {
                     json = buffer.Dequeue();
                     recv.SendBroadcast(json);
                     //Console.WriteLine($"BroadCast Packet : {json}");
                 }
+
+                // ignore Self BroadCast
                 else if (type == 2)
                 {
                     json = buffer.Dequeue();
